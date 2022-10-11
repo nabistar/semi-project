@@ -4,13 +4,58 @@
 	<meta charset="UTF-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>날씨</title>
+	<title>오늘의 날씨</title>
+	<link rel="stylesheet" href="assets/css/style.css">
+	<script src="https://kit.fontawesome.com/c5c3bac8f1.js" crossorigin="anonymous"></script>
 </head>
 <body>
-	<div data-include="inc/header.html"></div>
+	<!-- header 영역 -->
+	<header>
+		<div class="header_container">
+			<div class="header_main">
+				<div class="logo">
+					<img src="" alt="">
+					<div>오늘의 날씨</div>
+				</div>
+			</div>
+			<div class="location">
+				<div><img src="" alt=""></div>
+				<div>송파구 방이동</div>
+				<img src="" alt="">
+			</div>
+			<div>
+				<img src="" alt="">
+			</div>
+		</div>
+		<div class="search_box">
+			<div class="search_container">
+				<div class="search_input">
+					<img src="" alt="">
+					<input type="text" placeholder="장소 검색하기">
+				</div>
+				<div class="search_list"></div>
+			</div>
+		</div>
+		<div class="nav">
+			<ul>
+				<li><a href="">오늘의 날씨</a></li>
+				<li><a href="">오늘의 미세먼지</a></li>
+				<li><a href="">오늘의 습도</a></li>
+			</ul>
+		</div>
+	</header>
+
+	<!-- 메인 콘텐츠 영역 -->
 	<div>
 		<div id="map"></div>
 	</div>
-	<div data-include="inc/footer.html"></div>
+
+	<!-- footer 영역 -->
+	<footer>
+		<div>
+			<p>이 페이지는 이젠아카데미 풀스택반 과정에서 진행된 프로젝트 사이트입니다. <br/> 본 콘텐츠의 저작권은 제공처에 있으며, 이를 무단 이용하는 경우 저작권법 등에 따라 법적책임을 질 수 있습니다.</p>
+			<p>© Copyright FullStack.Inc 2022. All Rights Reserved.</p>
+		</div>
+	</footer>
 </body>
 </html>
