@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>날씨</title>
+	<link rel="stylesheet" href="assets/css/style.css">
+	<script src="https://kit.fontawesome.com/c5c3bac8f1.js" crossorigin="anonymous"></script>
+</head>
+<body>
+	<!-- header 영역 -->
+	<header>
+		<div class="header_container">
+			<div class="header_main">
+				<div class="logo">
+					<a href="index.html"><img src="" alt=""></a>
+					<div>오늘의 날씨</div>
+				</div>
+			</div>
+			<div class="location">
+				<div id="userLocation"><img src="./noimage.jpg" style="width:30px;height:30px;" /></div>
+				<div id="locationName">송파구 방이동</div>
+				<img src="" alt="">
+			</div>
+			<div>
+				<img src="" alt="">
+			</div>
+		</div>
+		<div class="search_box">
+			<div class="search_container">
+				<div class="search_input">
+					<img src="" alt="">
+					<form id="search_form">
+						<input type="text" id="search" placeholder="장소 검색하기">
+						<button type="submit">검색</button>
+					</form>
+				</div>
+				<div class="search_list"></div>
+			</div>
+		</div>
+		<div class="nav">
+			<ul>
+				<li><a href="view.html?view=tmp">오늘의 기온</a></li>
+				<li><a href="view.html?view=rain">오늘의 강수 확률</a></li>
+				<li><a href="view.html?view=wet">오늘의 습도</a></li>
+			</ul>
+		</div>
+	</header>
+
+	<!-- 메인 콘텐츠 영역 -->
+	<div class="main_box">
+		<div id="view_map" style="width:500px;height:400px;"></div>
+		<div id="weather">
+			<h1><img src="" /><span></span></h1>
+			<p></p>
+			<p></p>
+		</div>
+		<div class="box">
+			<p></p>
+			<div id="time">
+				<div class="tmp">
+					<p></p>
+					<img src="" />
+					<p></p>
+				</div>
+				<div class="tmp">
+					<p></p>
+					<img src="" />
+					<p></p>
+				</div>
+				<div class="tmp">
+					<p></p>
+					<img src="" />
+					<p></p>
+				</div>
+				<div class="tmp">
+					<p></p>
+					<img src="" />
+					<p></p>
+				</div>
+				<div class="tmp">
+					<p></p>
+					<img src="" />
+					<p></p>
+				</div>
+				<div class="tmp">
+					<p></p>
+					<img src="" />
+					<p></p>
+				</div>
+				<div class="tmp">
+					<p></p>
+					<img src="" />
+					<p></p>
+				</div>
+				<div class="tmp">
+					<p></p>
+					<img src="" />
+					<p></p>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- footer 영역 -->
+	<footer>
+		<div>
+			<p>이 페이지는 이젠아카데미 풀스택반 과정에서 진행된 프로젝트 사이트입니다. <br/> 본 콘텐츠의 저작권은 제공처에 있으며, 이를 무단 이용하는 경우 저작권법 등에 따라 법적책임을 질 수 있습니다.</p>
+			<p>© Copyright FullStack.Inc 2022. All Rights Reserved.</p>
+		</div>
+	</footer>
+
+	<script src="./node_modules/axios/dist/axios.min.js"></script>
+	<script src="//dapi.kakao.com/v2/maps/sdk.js?appkey=1922e7f8f3137c2a8777ff69a7937dbd"></script>
+	<script type="module">
+
+		import data from "./data.js";
+
+		document.querySelector("#userLocation").addEventListener("click", (e) => {
+
+			// 위치 조회 옵션
+		const options = {
+			enableHighAccuracy: true,
+			maximumAge: 0,
+			timeout: 30000,
+		};
+
+		// 성공시 수행될 콜백
+		function success(position){
+			const la = position.coords.latitude; //위도
+			const lo = position.coords.longitude; //경도
+			console.log(`위도: ${la}, 경도: ${lo}`);
+
+			KakaoMaps(la, lo);
+			document.querySelector("#locationName").innerHTML = "당신의 현재 위치입니다.";
+
+		}
+
+		// 실패시 수행될 콜백
+		function error(e){
+			console.error(e);
+		}
+
+		if(!navigator.geolocation){
+			alert("현재 브라우저가 위치 정보 기능을 제공하지 않습니다.");
+		} else {
+			navigator.geolocation.getCurrentPosition(success, error, options);
+		}
+
+		
+		});
+
+		// 맵 그리는 함수
+		function KakaoMaps(la, lo){
+			const mapBox = document.querySelector("#view_map");
+			const option = {
+			center: new kakao.maps.LatLng(la, lo),
+			lever: 3,
+		};
+			const map = new kakao.maps.Map(mapBox, option);
+		};
+
+		// 위도와 경도를 받을 변수
+		let la = null;
+		let lo = null;
+		let x = null;
+		let y = null;
+
+		// 검색한 장소의 위도와 경도 가져오기
+		document.querySelector("#search_form").addEventListener("submit", (e) => {
+			e.preventDefault();
+			// 검색한 장소를 표시
+			document.querySelector("#locationName").innerHTML = document.querySelector("#search").value;
+
+			const search = document.querySelector("#search").value.trim().split(" ");
+
+			for(let i=0; i<data.length; i++){
+					if (!search[1] && (data[i]["1단계"] === search[0] || data[i]["1단계"].indexOf(search[0]) !== -1)){
+						la = data[i]["위도(초/100)"];
+						lo = data[i]["경도(초/100)"];
+						x = data[i]["격자 X"];
+						y = data[i]["격자 Y"];
+						break;
+					} else if (!search[2] && (data[i]["2단계"] === search[1] || data[i]["2단계"].indexOf(search[1]) !== -1)){
+						la = data[i]["위도(초/100)"];
+						lo = data[i]["경도(초/100)"];
+						x = data[i]["격자 X"];
+						y = data[i]["격자 Y"];
+						break;
+					} else if(data[i]["3단계"] === search[2] || data[i]["3단계"].indexOf(search[2]) !== -1){
+						la = data[i]["위도(초/100)"];
+						lo = data[i]["경도(초/100)"];
+						x = data[i]["격자 X"];
+						y = data[i]["격자 Y"];
+						break;
+					} 
+				}
+			KakaoMaps(la, lo);
+			weather(x, y, "기온");
+		});
+		
+		function tT(time){
+				if(time<10){
+				time = "0"+time;
+			}
+
+				return time+="00";
+			}
+
+		async function weather(x, y, a){
+			// 화면에 내용이 있다면 삭제
+			const weather = document.querySelector("#weather");
+			while(weather.hasChildNodes()){
+				weather.removeChild(weather.firstChild);
+			}
+
+			// 날짜 구하기
+			const date = new Date();
+			let today = date.getFullYear()+""+(date.getMonth()+1);
+			const day = date.getDate();
+
+			if(day<9){
+				day = "0"+day;
+			}
+
+			today+=day;
+
+			// 기상청 단기예보 api 데이터 가져오기
+			let json = null;
+			const key = "06z5OH1NvkRRZtQnZeVn%2BbPpdVKuFXOCwyRhr7WCq8YIhawm6jnBJZTV0IxdhME%2FaJu%2Fc71%2F0gOeSVfsq1JNbw%3D%3D";
+
+			try {
+				const response = await axios.get(`http://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getVilageFcst?ServiceKey=${key}&numOfRows=300&pageNo=1&base_date=${today}&base_time=0500&nx=${x}&ny=${y}&dataType=json`);
+
+				json = response.data["response"]["body"]["items"]["item"];
+
+			} catch (e) {
+				console.error(e);
+			}
+
+			
+			//현재 시간
+			let time = new Date().getHours();
+			let thisTime = tT(time);
+
+
+			// 데이터 뽑아오는 함수
+			function data(time){
+				let tmp = null; //기온
+				let tmn = null; //일 최저 기온
+				let tmx = null; //일 최고 기온
+				let sky = null; //하늘 상태
+				let pop = null; //강수확률
+				let reh = null; //습도
+
+				for(let i of json){
+					if(time === i["fcstTime"]){
+						switch(i["category"]){
+							case "TMP":
+								tmp = i["fcstValue"];
+							case "TMN":
+								tmn = i["fcstValue"];
+							case "TMX":
+								tmx = i["fcstValue"];
+							case "SKY":
+								sky = i["fcstValue"];
+							case "POP":
+								pop = i["fcstValue"];
+							case "REH":
+								reh = i["fcstValue"];
+					}
+				}
+			}
+			return [tmp, tmn, tmx, sky, pop, reh]
+		}
+			
+			let weatherData = data(thisTime);
+
+			// weather란에 정보를 입력하는 함수
+			function weatherBox(a) {
+
+				const weather = document.querySelector("#weather");
+				while(weather.hasChildNodes()){
+					weather.removeChild(weather.firstChild);
+				}
+
+				const p1 = document.createElement("p");
+				const p2 = document.createElement("p");
+				const p3 = document.createElement("p");
+
+				if(a === "기온"){
+					p1.innerHTML = `현재 기온 ${weatherData[0]}℃`;
+					p3.innerHTML = `오늘의 최고 기온은 ${weatherData[2]}℃, 최저 기온은 ${weatherData[1]}℃입니다.`;
+
+				if(weatherData[3] === "1"){
+					p2.innerHTML = "오늘 날씨는 맑습니다.";
+				} else if (weatherData[3] === "3") {
+					p2.innerHTML = "오늘 날씨는 구름이 많습니다.";
+				} else {
+					p2.innerHTML = "오늘 날씨는 흐립니다.";
+				}
+
+				weather.appendChild(p1);
+				weather.appendChild(p2);
+				weather.appendChild(p3);
+
+
+				const p = document.querySelectorAll(".tmp p");
+
+				for (let i=0; i<(p.length/2); i++){
+					p[(2*i+1)].innerHTML = `${time+i}시`;
+					
+					let wd = data(tT(time+i));
+					p[(2*i)].innerHTML = wd[0] + "℃";
+				}
+
+				} else if (a === "강수량") {
+				p1.innerHTML = `오늘의 강수 확률은 ${weatherData[4]}%`;
+
+				if(parseInt(weatherData[4]) < 20){
+					p2.innerHTML = "오늘 비올 확률은 낮습니다.";
+				} else if (parseInt(weatherData[4]) <= 50) {
+					p2.innerHTML = "오늘 비가 올 수도 있습니다.";
+				} else {
+					p2.innerHTML = "오늘 비가 올 확률이 높습니다.";
+				}
+
+				weather.appendChild(p1);
+				weather.appendChild(p2);
+
+
+				const p = document.querySelectorAll(".tmp p");
+
+				for (let i=0; i<(p.length/2); i++){
+					p[(2*i+1)].innerHTML = `${time+i}시`;
+					
+					let wd = data(tT(time+i));
+					p[(2*i)].innerHTML = wd[4] + "%";
+				}
+			} else if (a === "습도"){
+				p1.innerHTML = `현재 습도는 ${weatherData[5]}%`;
+
+				if(parseInt(weatherData[5]) < 20){
+					p2.innerHTML = "현재 공기가 건조합니다.";
+				} else if (parseInt(weatherData[5]) <= 50) {
+					p2.innerHTML = "현재 습도가 적절합니다.";
+				} else {
+					p2.innerHTML = "현재 공기가 축축합니다.";
+				}
+
+				weather.appendChild(p1);
+				weather.appendChild(p2);
+
+
+				const p = document.querySelectorAll(".tmp p");
+
+				for (let i=0; i<(p.length/2); i++){
+					p[(2*i+1)].innerHTML = `${time+i}시`;
+					
+					let wd = data(tT(time+i));
+					p[(2*i)].innerHTML = wd[5] + "%";
+				}
+			}
+		}
+		weatherBox(a);
+	}
+
+
+		// 해당 버튼을 누를 때마다 탭을 옮겨감
+		const a1 = document.querySelector(".nav ul :nth-child(1) a");
+		const a2 = document.querySelector(".nav ul :nth-child(2) a");
+		const a3 = document.querySelector(".nav ul :nth-child(3) a");
+
+		let counter = null;
+		let stay = null;
+		let title = null;
+		let url = null;
+		let state = null;
+
+		function his(a) {
+			counter++;
+			url = `view.html?view=${counter}`;
+			state = {"위도": x, "경도": y, "상태": a};
+			history.pushState(state, title, url);
+		}
+
+		a1.addEventListener("click", (e) => {
+			e.preventDefault();
+			weather(x, y, "기온");
+			his("기온");
+		});
+
+		a2.addEventListener("click", (e) => {
+			e.preventDefault();
+			weather(x, y, "강수량");
+			his("강수량");
+		});
+
+		a3.addEventListener("click", (e) => {
+			e.preventDefault();
+			weather(x, y, "습도");
+			his("습도");
+		});
+		
+		window.addEventListener("popstate", (e) => {
+			weather(e.state["위도"], e.state["경도"], e.state["상태"] );
+		});
+		
+	
+		
+
+		
+	</script>
+</body>
+</html>
