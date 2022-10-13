@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="ko">
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>오늘의 날씨 - 메인페이지</title>
+        <link rel="stylesheet" href="assets/css/style.css" />
+        <script
+            src="https://kit.fontawesome.com/c5c3bac8f1.js"
+            crossorigin="anonymous"
+        ></script>
+    </head>
+    <body>
+        <!-- header 영역 -->
+        <header class="header">
+            <div class="header_container">
+                <div class="header_main">
+                    <div class="logo">
+                        <a href="index.html" class="Btn">
+                            <img
+                                src="assets/img/logo-icon.png"
+                                alt="logo-icon"
+                            />
+                            <div class="logo_name">오늘의 날씨</div>
+                        </a>
+                    </div>
+                </div>
+                <div class="location">
+                    <a href="#" id="userLocation">
+                        <div>
+                            <img src="assets/img/location.png" alt="location" />
+                        </div>
+                        <div class="location_name" id="locationName">
+                            현재 위치를 검색하세요
+                        </div>
+                    </a>
+                </div>
+                <div class="search_icon">
+                    <a href="#" class="toggleBtn"
+                        ><img src="assets/img/search.png" alt="search_glass"
+                    /></a>
+                </div>
+            </div>
+            <div class="search_box">
+                <div class="search_container">
+                    <div class="search_input">
+                        <div class="search_glass">
+                            <img
+                                src="assets/img/search.png"
+                                alt="seacrh glass"
+                            />
+                        </div>
+                        <form id="search_form" action="view.html">
+                            <input
+                                type="text"
+                                id="search"
+                                name="search"
+                                placeholder="장소 검색하기"
+                                required
+                            />
+                            <button type="submit">검색</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="nav">
+                <ul>
+                    <li><a href="#" class="Btn">오늘의 날씨</a></li>
+                    <li><a href="#" class="Btn">오늘의 강우량</a></li>
+                    <li><a href="#" class="Btn">오늘의 습도</a></li>
+                </ul>
+            </div>
+        </header>
+
+        <!-- 메인 콘텐츠 영역 -->
+        <div class="index_content">
+            <div id="index_map"></div>
+        </div>
+
+        <!-- footer 영역 -->
+        <footer>
+            <div class="footer">
+                <p>
+                    이 페이지는 이젠아카데미 풀스택반 과정에서 진행된 프로젝트
+                    사이트입니다. <br />
+                    본 콘텐츠의 저작권은 제공처에 있으며, 이를 무단 이용하는
+                    경우 저작권법 등에 따라 법적책임을 질 수 있습니다.
+                </p>
+                <p>© Copyright FullStack.Inc 2022. All Rights Reserved.</p>
+            </div>
+        </footer>
+
+        <script>
+            const toggleBtn = document.querySelector(".toggleBtn");
+            const search_box = document.querySelector(".search_box");
+            const userLocation = document.querySelector("#userLocation");
+
+            toggleBtn.addEventListener("click", (e) => {
+                e.preventDefault();
+                search_box.classList.toggle("active");
+            });
+
+            userLocation.addEventListener("click", (e) => {
+                e.preventDefault();
+                search_box.classList.toggle("active");
+            });
+        </script>
+
+        <script
+            type="text/javascript"
+            src="//dapi.kakao.com/v2/maps/sdk.js?appkey=036c3a794f3667575dd037fdeef3fd97"
+        ></script>
+        <script src="./node_modules/axios/dist/axios.min.js"></script><script src="./node_modules/dayjs/dayjs.min.js"></script>
+        <script type="module">
+            import data from "./data.js";
+
+			const now = dayjs();
+			const today = now.format("YYYYMMDD");
+			const thisTime = now.format("HH00");
+
+            async function maker(x, y, location) {
+                let tmp = null;
+
+                // 기상청 단기예보 api 데이터 가져오기
+                let json = null;
+                const key =
+                    "06z5OH1NvkRRZtQnZeVn%2BbPpdVKuFXOCwyRhr7WCq8YIhawm6jnBJZTV0IxdhME%2FaJu%2Fc71%2F0gOeSVfsq1JNbw%3D%3D";
+
+                // 현재 시간 온도인 tmp 가져옴
+                try {
+                    const response = await axios.get(
+                        `http://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getVilageFcst?ServiceKey=${key}&numOfRows=300&pageNo=1&base_date=${today}&base_time=0500&nx=${x}&ny=${y}&dataType=json`
+                    );
+
+                    json = response.data["response"]["body"]["items"]["item"];
+                } catch (e) {
+                    console.error(e);
+                }
+
+                for (let i of json) {
+                    if (thisTime === i["fcstTime"] && i["category"] === "TMP") {
+                        tmp = i["fcstValue"];
+                        break;
+                    }
+                }
+
+                // 위도와 경도 변수
+                let la = null;
+                let lo = null;
+
+                // 파라미터 location에 따라 위도와 경도 가져옴
+                for (let i = 0; i < data.length; i++) {
+                    if (data[i]["1단계"].indexOf(location) !== -1) {
+                        la = data[i]["위도(초/100)"];
+                        lo = data[i]["경도(초/100)"];
+                        break;
+                    }
+                }
+
+                var marker = new kakao.maps.Marker({
+                    map: index_map,
+                    position: new kakao.maps.LatLng(la, lo),
+                });
+
+                var infowindow = new kakao.maps.InfoWindow({
+                    content: `<div>[${location}] ${tmp}℃</div>`,
+                });
+
+                kakao.maps.event.addListener(
+                    marker,
+                    "mouseover",
+                    makeOverListener(index_map, marker, infowindow)
+                );
+				
+                kakao.maps.event.addListener(
+                    marker,
+                    "mouseout",
+                    makeOutListener(infowindow)
+                );
+            }
+
+            function makeOverListener(index_map, marker, infowindow) {
+                return function () {
+                    infowindow.open(index_map, marker);
+                };
+            }
+
+            function makeOutListener(infowindow) {
+                return function () {
+                    infowindow.close();
+                };
+            }
+
+            var mapContainer = document.getElementById("index_map"),
+                mapOption = {
+                    center: new kakao.maps.LatLng(36.334093, 127.393938),
+                    level: 13,
+                };
+
+            var index_map = new kakao.maps.Map(mapContainer, mapOption);
+
+            maker(60, 127, "서울");
+            maker(55, 124, "인천");
+            maker(66, 103, "세종");
+            maker(89, 90, "대구");
+            maker(58, 74, "광주");
+            maker(102, 84, "울산");
+            maker(98, 76, "부산");
+            maker(52, 38, "제주");
+
+            document.querySelectorAll(".nav ul li a").forEach((v, i) => {
+                v.addEventListener("click", (e) => {
+                    e.preventDefault();
+                    alert("위치를 검색하세요.");
+                });
+            });
+        </script>
+    </body>
+</html>
