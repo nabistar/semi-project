@@ -116,8 +116,15 @@
             import data from "./data.js";
 
 			const now = dayjs();
-			const today = now.format("YYYYMMDD");
+			let today = now.format("YYYYMMDD");
 			const thisTime = now.format("HH00");
+			const time = now.get("h");
+
+			// 가져오는 데이터가 당일 오전 6시~다음날 오전 6시
+			// 그러므로 오늘 오전 6시 전까지는 전날 데이터를 써야함
+			if (time < 6){
+				today = now.add(-1, "d").format("YYYYMMDD");
+			}
 
             async function maker(x, y, location) {
                 let tmp = null;

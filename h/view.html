@@ -252,9 +252,15 @@
 
                 // 날짜 구하기
                 const now = dayjs();
-				const today = now.format("YYYYMMDD");
+				let today = now.format("YYYYMMDD");
 				const thisTime = now.format("HH00");
 				const time = now.get("h");
+
+				// 가져오는 데이터가 당일 오전 6시~다음날 오전 6시
+				// 그러므로 오늘 오전 6시 전까지는 전날 데이터를 써야함
+				if (time < 6){
+				today = now.add(-1, "d").format("YYYYMMDD");
+				}
 
 
                 // 기상청 단기예보 api 데이터 가져오기
@@ -276,7 +282,7 @@
                 // 데이터 뽑아오는 함수
                 function data(thisTime) {
                     let tmp = null; //기온
-                    let tmpArr = []; //일 최저 기온
+                    let tmpArr = []; // 1시간마다 측정된 기온 배열
                     let sky = null; //하늘 상태
                     let pop = null; //강수확률
                     let reh = null; //습도
@@ -431,20 +437,20 @@
                     } else if (a === "강수량") {
                         p1.innerHTML = `오늘의 강수 확률은 ${weatherData[3]}%`;
 
-                        if (parseInt(weatherData[3]) < 20) {
+                        if (parseInt(weatherData[3]) < 40) {
                             p2.innerHTML = "오늘 비올 확률은 낮습니다.";
                             img.setAttribute(
                                 "src",
                                 "./assets/img/icon/icon11.png"
                             );
-                        } else if (parseInt(weatherData[3]) <= 50) {
+                        } else if (parseInt(weatherData[3]) <= 70) {
                             p2.innerHTML = "오늘 비가 올 수도 있습니다.";
-                            img.setAttribute("src", "./assets/img/icon/icon15");
+                            img.setAttribute("src", "./assets/img/icon/icon15.png");
                         } else {
                             p2.innerHTML = "오늘 비가 올 확률이 높습니다.";
                             img.setAttribute(
                                 "src",
-                                "./assets/img/icon/icon115"
+                                "./assets/img/icon/icon115.png"
                             );
                         }
 
