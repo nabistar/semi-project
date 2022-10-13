@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>오늘의 날씨 - 습도</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+    <!-- header 영역 -->
+	<header class="header">
+		<div class="header_container">
+			<div class="header_main">
+				<div class="logo">
+					<a href="index.html" class="Btn">
+						<img src="assets/img/logo-icon.png" alt="logo-icon">
+						<div class="logo_name">오늘의 날씨</div>
+					</a>
+				</div>
+			</div>
+			<div class="location">
+				<div><img src="assets/img/location.png" alt="location"></div>
+				<div class="location_name">송파구 방이동</div>
+			</div>
+			<div class="search_icon">
+				<a href="#" class="toggleBtn"><img src="assets/img/search.png" alt="search_glass"></a>
+			</div>
+		</div>
+		<div class="search_box">
+			<div class="search_container">
+				<div class="search_input">
+					<div class="search_glass">
+						<img src="assets/img/search.png" alt="seacrh glass">
+					</div>
+					<form id="search_form">
+						<input type="text" id="search" placeholder="장소 검색하기">
+						<button type="submit">검색</button>
+					</form>
+				</div>
+			</div>
+		</div>
+		<div class="nav">
+			<ul>
+				<li><a href="1_weather.html" class="Btn">오늘의 날씨</a></li>
+				<li><a href="2_pm.html" class="Btn">오늘의 강우량</a></li>
+				<li><a href="3_temperature.html" class="Btn">오늘의 습도</a></li>
+			</ul>
+		</div>
+	</header>
+
+    <div class="pm_content">
+        <div id="map"></div>
+    </div>
+
+    <!-- footer 영역 -->
+	<footer>
+		<div class="footer">
+			<p>이 페이지는 이젠아카데미 풀스택반 과정에서 진행된 프로젝트 사이트입니다. <br/> 본 콘텐츠의 저작권은 제공처에 있으며, 이를 무단 이용하는 경우 저작권법 등에 따라 법적책임을 질 수 있습니다.</p>
+			<p>© Copyright FullStack.Inc 2022. All Rights Reserved.</p>
+		</div>
+	</footer>
+
+    <script>
+		const toggleBtn = document.querySelector('.toggleBtn');
+		const search_box = document.querySelector('.search_box');
+
+		toggleBtn.addEventListener('click', (e) => {
+			e.preventDefault();
+    		search_box.classList.toggle('active');
+		});
+	</script>
+
+    <script>
+        var container = document.getElementById('map');
+        var options = {
+            center: new kakao.maps.LatLng(36.334093, 127.393938),
+            level: 14
+        };
+        var map = new kakao.maps.Map(container, options);
+    </script>
+    <script>
+        var mapContainer = document.getElementById('map'),  
+            mapOption = {
+                center: new kakao.maps.LatLng(36.334093, 127.393938),
+                level: 14
+            };
+        var map = new kakao.maps.Map(mapContainer, mapOption); 
+        var positions = [
+        {
+                content: '<div>[대전] 20°C / 50%</div>',
+                latlng: new kakao.maps.LatLng(36.334093, 127.393938)
+            },
+            {
+                content: '<div>[서울] 20°C / 50%</div>',
+                latlng: new kakao.maps.LatLng(37.579852, 126.985042)
+            },
+            {
+                content: '<div>[인천] 20°C / 50%</div>',
+                latlng: new kakao.maps.LatLng(37.445935, 126.670909)
+            },
+            {
+                content: '<div>[세종] 20°C / 50%</div>',
+                latlng: new kakao.maps.LatLng(36.557998, 127.266632)
+            },
+            {
+                content: '<div>[대구] 20°C / 50%</div>',
+                latlng: new kakao.maps.LatLng(35.822861, 128.578493)
+            },
+            {
+                content: '<div>[광주] 20°C / 50%</div>',
+                latlng: new kakao.maps.LatLng(35.151580, 126.814613)
+            },
+            {
+                content: '<div>[울산] 20°C / 50%</div>',
+                latlng: new kakao.maps.LatLng(35.584867, 129.338446)
+            },
+            {
+                content: '<div>[부산] 20°C / 50%</div>',
+                latlng: new kakao.maps.LatLng(35.159263, 129.047085)
+            },
+            {
+                content: '<div>[제주] 20°C / 50%</div>',
+                latlng: new kakao.maps.LatLng(33.382104, 126.554565)
+            },
+        ];
+        for (var i = 0; i < positions.length; i++) {
+            var marker = new kakao.maps.Marker({
+                map: map, 
+                position: positions[i].latlng 
+            });
+            var infowindow = new kakao.maps.InfoWindow({
+                content: positions[i].content 
+            });
+            kakao.maps.event.addListener(marker, 'mouseover', makeOverListener(map, marker, infowindow));
+            kakao.maps.event.addListener(marker, 'mouseout', makeOutListener(infowindow));
+        }
+        function makeOverListener(map, marker, infowindow) {
+            return function () {
+                infowindow.open(map, marker);
+            };
+        }
+        function makeOutListener(infowindow) {
+            return function () {
+                infowindow.close();
+            };
+        }
+    </script>
+</body>
+</html>
