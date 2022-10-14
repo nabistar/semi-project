@@ -140,6 +140,7 @@
         </footer>
 
         <script>
+			// 돋보기 버튼을 누르거나 위치 검색 글자를 누르면 검색창이 나타나도록 함
             const toggleBtn = document.querySelector(".toggleBtn");
             const search_box = document.querySelector(".search_box");
             const main_box = document.querySelector(".main_box");
@@ -166,9 +167,12 @@
 			let map = null;
 
             // 맵 그리는 함수
+			// 파라미터 la는 위도, lo는 경도
             function KakaoMaps(la, lo) {
 				const loc = new kakao.maps.LatLng(la, lo);
 
+				// 맵을 계속 지웠다가 다시 그릴 필요 없이 검색한 위치가 바뀌면 한 지도 내에서 그 위치로 이동시킴
+				// 맵이 없다면 새로 그리고, 있다면 이동시키는 if문
 				if (map == null) {
 					const mapBox = document.querySelector("#map");
 					const option = {
@@ -188,11 +192,13 @@
             let x = null;
             let y = null;
 
-            // 검색한 값 변수로 넘겨받기
+            // index에서 검색한 값 변수로 넘겨받기
             const params = util.getUrlParams();
 			let pa = decodeURIComponent(params.search);
             let value = pa.trim().split("+");
 
+			// 검색한 값을 화면 상단 가운데에 표시하도록 함
+			// 시, 동, 구 순서로 배치된 배열 value를 이용해 if문
             if (value[2]) {
                 document.querySelector("#locationName").innerHTML =
                     value[0] + " " + value[1] + " " + value[2];
@@ -203,6 +209,7 @@
 				document.querySelector("#locationName").innerHTML = value[0];
 			}
 
+			// 검색한 값을 가지고 와서 data.js에 있는 데이터를 반복돌며 해당하는 값의 위도, 경도, x좌표, y좌표를 가져옴
 			const search = value;
 			for (let i = 0; i < data.length; i++) {
 				if (
@@ -237,12 +244,15 @@
 				}
 			}
 
+				// 가지고 온 위도와 경도를 console로 확인
+				// 밑에 있는 weather 함수를 호출하여 날씨 값을 화면에 나타내고, KakaoMaps 함수로 맵을 그림
 				console.log(`위도: ${la}, 경도: ${lo}`);
                 weather(x, y, "기온");
                 KakaoMaps(la, lo);
 
            
             // 날씨 통합 함수
+			// 파라미터 x는 x좌표, y는 y좌표, a는 weatherBox 함수의 파라미터로 넘겨줄 값
             async function weather(x, y, a) {
                 // 화면에 내용이 있다면 삭제
                 const weather = document.querySelector("#weather");
@@ -279,7 +289,8 @@
                     console.error(e);
                 }
 
-                // 데이터 뽑아오는 함수
+                // 가지고 온 데이터에서 원하는 데이터 뽑아오는 함수
+				// 파라미터 thisTime은 원하는 시간
                 function data(thisTime) {
                     let tmp = null; //기온
                     let tmpArr = []; // 1시간마다 측정된 기온 배열
@@ -317,6 +328,7 @@
                 let weatherData = data(thisTime);
 
                 // 시간별 데이터에 정보를 입력하는 함수
+				// 파라미터 n는 data 함수로 가져온 배열에서 원하는 값의 인덱스, f는 단위(℃나 %)
                 function inner(n, f) {
                     const p = document.querySelectorAll(".tmp p");
                     const tmp_img = document.querySelectorAll(".tmp img");
@@ -332,6 +344,7 @@
                         }
                         p[2 * i].innerHTML = wd[n] + f;
 
+						// 파라미터 n에 따라 삽입할 이미지 결정
                         switch (n) {
                             case 0:
                                 if (wd[2] === "1") {
@@ -392,12 +405,9 @@
                 }
 
                 // weather란에 정보를 입력하는 함수
+				// 파라미터 a는 가지고 올 값의 이름
                 function weatherBox(a) {
-                    const weather = document.querySelector("#weather");
-                    while (weather.hasChildNodes()) {
-                        weather.removeChild(weather.firstChild);
-                    }
-
+                    
                     const p1 = document.createElement("p");
                     const p2 = document.createElement("p");
                     const p3 = document.createElement("p");
@@ -405,6 +415,7 @@
                     const img1 = document.createElement("img");
                     img1.setAttribute("class", "img1");
 
+					// 해당 시간 기온, 최저 및 죄고 기온을 가지고 오고, 하늘 값에 따라 날씨 상태 출력
                     if (a === "기온") {
                         p1.innerHTML = `현재 기온 ${weatherData[0]}℃`;
                         p3.innerHTML = `오늘의 최고 기온은 ${weatherData[1][23]}℃,<br/> 최저 기온은 ${weatherData[1][0]}℃입니다.`;
@@ -434,6 +445,8 @@
                         weather.appendChild(p3);
                         weather.appendChild(img);
                         inner(0, "℃");
+
+						// 해당 시간 강수량을 가지고 오고 강수량에 따라 강수 확률의 상태 출력
                     } else if (a === "강수량") {
                         p1.innerHTML = `오늘의 강수 확률은 ${weatherData[3]}%`;
 
@@ -458,6 +471,8 @@
                         weather.appendChild(p2);
                         weather.appendChild(img);
                         inner(3, "%");
+
+						// 해당 시간 습도를 가지고 오고 습도에 따라 공기 상태 출력
                     } else if (a === "습도") {
                         p1.innerHTML = `현재 습도는 ${weatherData[4]}%`;
 
@@ -509,7 +524,7 @@
 
             const time_temp = document.querySelector(".time_temp");
 
-            // 클릭 시 화면 내용이 바뀌고 페이지 백업함
+            // 클릭 시 화면 내용이 바뀌고 페이지 백업함, 클릭한 버튼 강조
             a1.addEventListener("click", (e) => {
                 e.preventDefault();
                 weather(x, y, "기온");

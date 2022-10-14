@@ -92,6 +92,7 @@
         </footer>
 
         <script>
+			// 돋보기 버튼을 누르거나 위치 검색 글자를 누르면 검색창이 나타나도록 함
             const toggleBtn = document.querySelector(".toggleBtn");
             const search_box = document.querySelector(".search_box");
             const userLocation = document.querySelector("#userLocation");
@@ -115,6 +116,7 @@
         <script type="module">
             import data from "./data.js";
 
+			// dayjs 라이브러리를 사용하여 날짜 및 시간을 원하는 형태로 만듦
 			const now = dayjs();
 			let today = now.format("YYYYMMDD");
 			const thisTime = now.format("HH00");
@@ -126,15 +128,16 @@
 				today = now.add(-1, "d").format("YYYYMMDD");
 			}
 
+			// 마커를 만드는 함수
+			// x는 위치의 x좌표, y는 위치의 y좌표, location은 지역 이름
             async function maker(x, y, location) {
-                let tmp = null;
+                let tmp = null; // 기온을 가져올 변수
 
                 // 기상청 단기예보 api 데이터 가져오기
                 let json = null;
                 const key =
                     "06z5OH1NvkRRZtQnZeVn%2BbPpdVKuFXOCwyRhr7WCq8YIhawm6jnBJZTV0IxdhME%2FaJu%2Fc71%2F0gOeSVfsq1JNbw%3D%3D";
 
-                // 현재 시간 온도인 tmp 가져옴
                 try {
                     const response = await axios.get(
                         `http://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getVilageFcst?ServiceKey=${key}&numOfRows=300&pageNo=1&base_date=${today}&base_time=0500&nx=${x}&ny=${y}&dataType=json`
@@ -145,10 +148,11 @@
                     console.error(e);
                 }
 
+				// 가져온 데이터를 반복 돌면서 현재 시간 온도인 tmp 가져옴
                 for (let i of json) {
                     if (thisTime === i["fcstTime"] && i["category"] === "TMP") {
                         tmp = i["fcstValue"];
-                        break;
+                        break; // 찾으면 반복 중단
                     }
                 }
 
@@ -165,6 +169,7 @@
                     }
                 }
 
+				// 마커를 만들기
                 var marker = new kakao.maps.Marker({
                     map: index_map,
                     position: new kakao.maps.LatLng(la, lo),
@@ -174,6 +179,7 @@
                     content: `<div>[${location}] ${tmp}℃</div>`,
                 });
 
+				// 마커에 마우스를 올리면 텍스트가 나오고 내리면 텍스트가 사라지도록 함
                 kakao.maps.event.addListener(
                     marker,
                     "mouseover",
@@ -199,6 +205,7 @@
                 };
             }
 
+			// 맵을 그림
             var mapContainer = document.getElementById("index_map"),
                 mapOption = {
                     center: new kakao.maps.LatLng(36.334093, 127.393938),
@@ -216,6 +223,7 @@
             maker(98, 76, "부산");
             maker(52, 38, "제주");
 
+			// 위치 검색을 하지 않았을 때 버튼을 누르면 위치를 검색하라는 alert이 뜨도록 함
             document.querySelectorAll(".nav ul li a").forEach((v, i) => {
                 v.addEventListener("click", (e) => {
                     e.preventDefault();
