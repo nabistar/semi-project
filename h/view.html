@@ -266,7 +266,7 @@
 				const thisTime = now.format("HH00");
 				const time = now.get("h");
 
-				// 가져오는 데이터가 당일 오전 6시~다음날 오전 6시
+				// 가져오는 데이터가 당일 오전 6시~다음날 오전 5시
 				// 그러므로 오늘 오전 6시 전까지는 전날 데이터를 써야함
 				if (time < 6){
 				today = now.add(-1, "d").format("YYYYMMDD");
@@ -280,10 +280,11 @@
 
                 try {
                     const response = await axios.get(
-                        `http://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getVilageFcst?ServiceKey=${key}&numOfRows=300&pageNo=1&base_date=${today}&base_time=0500&nx=${x}&ny=${y}&dataType=json`
+                        `http://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getVilageFcst?ServiceKey=${key}&numOfRows=288&pageNo=1&base_date=${today}&base_time=0500&nx=${x}&ny=${y}&dataType=json`
                     );
 
                     json = response.data["response"]["body"]["items"]["item"];
+					console.log(json);
 
                 } catch (e) {
                     console.error(e);
